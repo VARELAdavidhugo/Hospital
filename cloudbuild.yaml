@@ -1,13 +1,7 @@
 # cloudbuild.yaml
 
-options:
-  logging: CLOUD_LOGGING_ONLY
-  env:
-    - 'CLOUDSDK_COMPUTE_ZONE=europe-west1-b'
-    - 'CLOUDSDK_CONTAINER_CLUSTER=hospital-cluster'
-
 steps:
-  #1️⃣ Build de l’image
+  #1️⃣ Build de l’image Docker
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
@@ -15,17 +9,17 @@ steps:
       - 'gcr.io/$PROJECT_ID/hospital-app'
       - '.'
 
-  # 2️⃣ Récupération des credentials du cluster
+  # 2️⃣ Récupérer les credentials Kubernetes
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        gcloud container clusters get-credentials "$CLOUDSDK_CONTAINER_CLUSTER" \
-          --zone "$CLOUDSDK_COMPUTE_ZONE" \
-          --project "$PROJECT_ID"
+        gcloud container clusters get-credentials hospital-cluster \
+          --zone=europe-west1-b \
+          --project=$PROJECT_ID
 
-  # 3️⃣ Déploiement sur GKE
+  # 3️⃣ Déployer sur GKE
   - name: 'gcr.io/cloud-builders/kubectl'
     args:
       - 'apply'
@@ -35,5 +29,9 @@ steps:
 # Pousser l’image dans GCR
 images:
   - 'gcr.io/$PROJECT_ID/hospital-app'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 
 
