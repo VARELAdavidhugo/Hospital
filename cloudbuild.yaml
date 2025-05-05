@@ -1,5 +1,3 @@
-# cloudbuild.yaml
-
 steps:
   #1️⃣ Build de l’image Docker
   - name: 'gcr.io/cloud-builders/docker'
@@ -9,22 +7,19 @@ steps:
       - 'gcr.io/$PROJECT_ID/hospital-app'
       - '.'
 
-  # 2️⃣ Récupérer les credentials Kubernetes
+  # 2️⃣ Récupérer les credentials et déployer dans la foulée
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
+        # Récupérer les creds Kubernetes
         gcloud container clusters get-credentials hospital-cluster \
           --zone=europe-west1-b \
           --project=$PROJECT_ID
 
-  # 3️⃣ Déployer sur GKE
-  - name: 'gcr.io/cloud-builders/kubectl'
-    args:
-      - 'apply'
-      - '-f'
-      - './k8s/deployment.yaml'
+        # Déployer le manifeste
+        kubectl apply -f ./k8s/deployment.yaml
 
 # Pousser l’image dans GCR
 images:
@@ -32,6 +27,7 @@ images:
 
 options:
   logging: CLOUD_LOGGING_ONLY
+
 
 
 
