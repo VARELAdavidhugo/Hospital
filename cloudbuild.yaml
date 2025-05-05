@@ -1,16 +1,15 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/hopital_app:$COMMIT_SHA', '.']
-
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/hopital_app:$COMMIT_SHA']
-
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/hospital-app', '.']
   - name: 'gcr.io/cloud-builders/kubectl'
     args:
-      - 'set'
-      - 'image'
-      - 'deployment/hospital-deployment'
-      - 'hospital-container=gcr.io/$PROJECT_ID/hopital_app:$COMMIT_SHA'
+      - 'apply'
+      - '-f'
+      - 'k8s/deployment.yaml'
     env:
       - 'CLOUDSDK_COMPUTE_ZONE=europe-west1-b'
       - 'CLOUDSDK_CONTAINER_CLUSTER=hospital-cluster'
+  
+# Ajouter ici la configuration des journaux
+options:
+  logging: CLOUD_LOGGING_ONLY
